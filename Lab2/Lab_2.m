@@ -3,6 +3,7 @@ offset = 2;
 radius_of_rotor = 1.1/100; % radius of rotor = 1.1(cm) = 1.1/100(m)
 weight_of_rotor = 0.017; % weight of rotor = 17g = 0.017kg
 gear_ratio = 48; %gear ratio of EV3 motor = 48
+L = 0.0047; % do tu cam cua cuon day
 % read file
 results = readmatrix("current_measure.txt");
 
@@ -15,9 +16,9 @@ PWM_P = results(11:end,1);
 voltages_P = results(11:end-offset,2);
 currents_P = results(11:end-offset,3);
 % Get voltages 
-voltages = results(2:end,2);%chinh lai sau khi restart may
+voltages = results(1:end,2);%chinh lai sau khi restart may
 
-function_to_cal_voltage = @(resistance, current) (current*resistance)
+function_to_cal_voltage = @(resistance, current) (current*resistance);
 
 % create predict value
 predict_resistance = 50;
@@ -43,19 +44,20 @@ hold off
 
 % 1.9 Calculate final resistance value
     resistance = (resistance_P+resistance_N)/2;
+    R = resistance;
 
 % 2.1 Calculate moment of inertia and moment of inertia after gearbox
     moment_of_inertia = weight_of_rotor*radius_of_rotor*radius_of_rotor/2
     moment_of_inertia_after_gear_box = moment_of_inertia*gear_ratio*gear_ratio
-
+    J = moment_of_inertia_after_gear_box;
 % 2.5 Create 2x 2d array of Wnls which depend on PWM
     funSpeed = @(x,time) x(1)*(1-exp(-time/x(2)));
     funAngle = @(x,time) x(1)*(time-x(2)*(1-exp(-time/x(2))));
     
-    array_Wnls_speed=[]
-    array_Wnls_cordinate=[]
-    array_of_PWM = -90:10:100; %chinh lai sau khi res
-    for i = -90:10:100 % chinh lai sau khi res
+    array_Wnls_speed=[];
+    array_Wnls_cordinate=[];
+    array_of_PWM = -100:10:100; %chinh lai sau khi res
+    for i = -100:10:100 % chinh lai sau khi res
         results = readmatrix("clear_data_"+num2str(i)+".txt");
         time = results(:,1);
         angles = results(:,2)*pi/180;
@@ -79,8 +81,8 @@ hold off
         array_Wnls_cordinate = [array_Wnls_cordinate fit_result_cordinate(1)];
     end
     
-    %array_PWM_Wnls_speed = [array_of_PWM' array_Wnls_speed']
-    %array_PWM_Wnls_cordinate = [array_of_PWM' array_Wnls_cordinate']
+    array_PWM_Wnls_speed = [array_of_PWM' array_Wnls_speed']
+    array_PWM_Wnls_cordinate = [array_of_PWM' array_Wnls_cordinate']
 
 % 2.6 Calculate Ke
     function_to_cal_voltage = @(Ke, Wnls) Ke*Wnls;
@@ -92,13 +94,14 @@ hold off
     plot(array_Wnls_speed, Ke*array_Wnls_speed, 'g');
     text(array_Wnls_speed(end)/2, voltages(end)/2, "Ke= "+ num2str(Ke));
     hold off;
-% 2.7 Let Km = Ke
-    Km = Ke;
 %     arr_Ke = [];
 %     for i = 1:20 %chinh lai thanh 21
 %         Ke = voltages(i)/array_Wnls_speed(i);
 %         arr_Ke = [arr_Ke Ke];
 %     end
+% 2.7 Let Km = Ke
+    Km = Ke;
+
 
 
 

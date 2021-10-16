@@ -6,8 +6,5 @@ for i = -100:10:100
         matrix(j, 2) = matrix(j,2) - matrix(2,2);
         fprintf(fileID, "%f %d %d\n",matrix(j, 1), matrix(j, 2), matrix(j, 3));
     end
-    
-    
-    
     fclose(fileID);
 end
