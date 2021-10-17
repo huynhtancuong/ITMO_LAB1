@@ -8,7 +8,7 @@ type_of_export_graph = '.png';
 simulation_model_1_coordinate_stop_time = "3";
 simulation_model_1_current_stop_time = "0.5";
 % read file
-results = readmatrix("current_measure.txt");
+results = readmatrix("Data/current_measure.txt");
 
 % get negative pwm, voltage, current
 PWM_N = results(1:10,1);
@@ -33,20 +33,20 @@ resistance_N = lsqcurvefit(function_to_cal_voltage, predict_resistance, currents
 
 % Draw graph of U(I) using resistance_N
 
-%     figure("Name", "Negative");
-%     hold on
-%     plot(currents_N, voltages_N, 'red')
-%     plot(currents_N, currents_N*resistance_N, 'k')
-%     text(currents_N(end), voltages_N(end), num2str(resistance_N));
-%     hold off
+    figure("Name", "Negative");
+    hold on
+    plot(currents_N, voltages_N, 'red')
+    plot(currents_N, currents_N*resistance_N, 'k')
+    text(currents_N(end), voltages_N(end), num2str(resistance_N));
+    hold off
 % Draw graph of U(I) using resistance_P
 
-%     figure("Name", "Positive");
-%     hold on
-%     plot(currents_P, voltages_P, 'red')
-%     plot(currents_P, currents_P*resistance_P, 'k')
-%     text(currents_P(end), voltages_P(end), num2str(resistance_P));
-%     hold off
+    figure("Name", "Positive");
+    hold on
+    plot(currents_P, voltages_P, 'red')
+    plot(currents_P, currents_P*resistance_P, 'k')
+    text(currents_P(end), voltages_P(end), num2str(resistance_P));
+    hold off
 
 % 1.9 Calculate final resistance value
     resistance = (resistance_P+resistance_N)/2;
@@ -64,7 +64,7 @@ resistance_N = lsqcurvefit(function_to_cal_voltage, predict_resistance, currents
     array_Wnls_cordinate=[];
     array_of_PWM = -100:10:100; %chinh lai sau khi res
     for i = -100:10:100 % chinh lai sau khi res
-        results = readmatrix("clear_data_"+num2str(i)+".txt");
+        results = readmatrix("Data/clear_data_"+num2str(i)+".txt");
         time = results(:,1);
         angles = results(:,2)*pi/180;
         speeds = results(:, 3)*pi/180;
@@ -122,7 +122,7 @@ resistance_N = lsqcurvefit(function_to_cal_voltage, predict_resistance, currents
         % Set legend for model
         legend("Model");
         path_to_file = "Graphs/Simulation/Currents/U=" + num2str(U) + type_of_export_graph;
-        saveas(gcf, path_to_file);
+        %saveas(gcf, path_to_file);
     end
 
 % Run simulation and collect output of coordinate
@@ -145,7 +145,7 @@ resistance_N = lsqcurvefit(function_to_cal_voltage, predict_resistance, currents
         plot(model_1.coordinate.Time, model_1.coordinate.Data, "red");
 
         % Graph of real coordinate
-        real_life_results = readmatrix("clear_data_"+num2str(PWM(i))+".txt");
+        real_life_results = readmatrix("Data/clear_data_"+num2str(PWM(i))+".txt");
         real_life_times = real_life_results(:,1);
         real_life_coordinates = real_life_results(:,2)*pi/180;
         plot(real_life_times, real_life_coordinates, "blue");
@@ -154,7 +154,7 @@ resistance_N = lsqcurvefit(function_to_cal_voltage, predict_resistance, currents
         legend("Model", "Experiment");
         % To save graph as png
         path_to_file = "Graphs/Simulation/Coordinate/U=" + num2str(U) + type_of_export_graph;
-        saveas(gcf, path_to_file);
+        %saveas(gcf, path_to_file);
     end
 
 
