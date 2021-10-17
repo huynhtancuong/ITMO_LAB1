@@ -4,6 +4,7 @@ radius_of_rotor = 1.1/100; % radius of rotor = 1.1(cm) = 1.1/100(m)
 weight_of_rotor = 0.017; % weight of rotor = 17g = 0.017kg
 gear_ratio = 48; %gear ratio of EV3 motor = 48
 L = 0.0047; % do tu cam cua cuon day
+type_of_export_graph = '.png';
 % read file
 results = readmatrix("current_measure.txt");
 
@@ -99,7 +100,7 @@ resistance_N = lsqcurvefit(function_to_cal_voltage, predict_resistance, currents
 % 2.7 Let Km = Ke
     Km = Ke;
 
-% Run simulation and collect output of coordinate and current
+% Run simulation and collect output of current strength
     for i = 1:1:length(voltages)
         U = voltages(i);
         if (U==0) % Bypass the value U = 0
@@ -107,7 +108,26 @@ resistance_N = lsqcurvefit(function_to_cal_voltage, predict_resistance, currents
         end 
         model_1 = sim("model_lab_2.slx");
         figure("Name","Model 1: Voltage = "+num2str(U));
-        plot(model_1.current.Time, model_1.current.Data);
+        %plot(model_1.current.Time, model_1.current.Data);
+        xlabel("Time, [sec]");
+        ylabel("I, [Ampe]");
+        path_to_file = "Graphs/Simulation/Currents/U=" + num2str(U) + type_of_export_graph;
+        %saveas(gcf, path_to_file);
+    end
+
+% Run simulation and collect output of coordinate
+    for i = 1:1:length(voltages)
+        U = voltages(i);
+        if (U==0) % Bypass the value U = 0
+            continue; 
+        end 
+        model_1 = sim("model_lab_2.slx");
+        figure("Name","Model 1: Voltage = "+num2str(U));
+        plot(model_1.coordinate.Time, model_1.coordinate.Data);
+        xlabel("Time, [sec]");
+        ylabel("θ, [rad]");
+        path_to_file = "Graphs/Simulation/Coordinate/U=" + num2str(U) + type_of_export_graph
+        saveas(gcf, path_to_file);
     end
 
 
