@@ -4,6 +4,7 @@ radius_of_rotor = 1.1/100; % radius of rotor = 1.1(cm) = 1.1/100(m)
 weight_of_rotor = 0.017; % weight of rotor = 17g = 0.017kg
 gear_ratio = 48; %gear ratio of EV3 motor = 48
 L = 0.0047; % do tu cam cua cuon day
+type_of_export_graph = 'png';
 % read file
 results = readmatrix("current_measure.txt");
 
@@ -28,19 +29,21 @@ resistance_P = lsqcurvefit(function_to_cal_voltage, predict_resistance, currents
 resistance_N = lsqcurvefit(function_to_cal_voltage, predict_resistance, currents_N, voltages_N);
 
 % Draw graph of U(I) using resistance_N
-figure("Name", "Negative");
-hold on
-plot(currents_N, voltages_N, 'red')
-plot(currents_N, currents_N*resistance_N, 'k')
-text(currents_N(end), voltages_N(end), num2str(resistance_N));
-hold off
+
+%     figure("Name", "Negative");
+%     hold on
+%     plot(currents_N, voltages_N, 'red')
+%     plot(currents_N, currents_N*resistance_N, 'k')
+%     text(currents_N(end), voltages_N(end), num2str(resistance_N));
+%     hold off
 % Draw graph of U(I) using resistance_P
-figure("Name", "Positive");
-hold on
-plot(currents_P, voltages_P, 'red')
-plot(currents_P, currents_P*resistance_P, 'k')
-text(currents_P(end), voltages_P(end), num2str(resistance_P));
-hold off
+
+%     figure("Name", "Positive");
+%     hold on
+%     plot(currents_P, voltages_P, 'red')
+%     plot(currents_P, currents_P*resistance_P, 'k')
+%     text(currents_P(end), voltages_P(end), num2str(resistance_P));
+%     hold off
 
 % 1.9 Calculate final resistance value
     resistance = (resistance_P+resistance_N)/2;
@@ -88,19 +91,43 @@ hold off
     function_to_cal_voltage = @(Ke, Wnls) Ke*Wnls;
     predict_Ke = 1;
     Ke = lsqcurvefit(function_to_cal_voltage, predict_Ke, array_Wnls_speed, voltages')
-    figure("Name", "U(w)");
-    hold on
-    plot(array_Wnls_speed, voltages, '.r')
-    plot(array_Wnls_speed, Ke*array_Wnls_speed, 'g');
-    text(array_Wnls_speed(end)/2, voltages(end)/2, "Ke= "+ num2str(Ke));
-    hold off;
-%     arr_Ke = [];
-%     for i = 1:20 %chinh lai thanh 21
-%         Ke = voltages(i)/array_Wnls_speed(i);
-%         arr_Ke = [arr_Ke Ke];
-%     end
+%     figure("Name", "U(w)");
+%     hold on
+%     plot(array_Wnls_speed, voltages, '.r')
+%     plot(array_Wnls_speed, Ke*array_Wnls_speed, 'g');
+%     text(array_Wnls_speed(end)/2, voltages(end)/2, "Ke= "+ num2str(Ke));
+%     hold off;
 % 2.7 Let Km = Ke
     Km = Ke;
+
+% Run simulation and collect output of current strength
+    for i = 1:1:1
+        U = voltages(i);
+        if (U==0) % Bypass the value U = 0
+            continue; 
+        end 
+        model_1 = sim("model_lab_2.slx");
+        figure("Name","Model 1: Voltage = "+num2str(U));
+        plot(model_1.current.Time, model_1.current.Data);
+        xlabel("Time, [sec]");
+        ylabel("I, [Ampe]");
+        path_to_subfolder = "U=" + num2str(U);
+        saveas(gcf, path_to_subfolder], type_of_export_graph);
+    end
+
+% Run simulation and collect output of coordinate
+    for i = 1:1:1
+        U = voltages(i);
+        if (U==0) % Bypass the value U = 0
+            continue; 
+        end 
+        model_1 = sim("model_lab_2.slx");
+        figure("Name","Model 1: Voltage = "+num2str(U));
+        plot(model_1.coordinate.Time, model_1.coordinate.Data);
+        xlabel("Time, [sec]");
+        ylabel("θ, [rad]");
+    end
+
 
 
 
