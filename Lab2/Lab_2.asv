@@ -5,8 +5,6 @@ weight_of_rotor = 0.017; % weight of rotor = 17g = 0.017kg
 gear_ratio = 48; %gear ratio of EV3 motor = 48
 L = 0.0047; % do tu cam cua cuon day
 type_of_export_graph = '.png';
-simulation_model_1_coordinate_stop_time = "3";
-simulation_model_1_current_stop_time = "0.5";
 % read file
 results = readmatrix("current_measure.txt");
 
@@ -19,8 +17,7 @@ PWM_P = results(11:end,1);
 voltages_P = results(11:end-offset,2);
 currents_P = results(11:end-offset,3);
 % Get voltages 
-voltages = results(1:end,2);
-PWM = results(1:end, 1);
+voltages = results(1:end,2);%chinh lai sau khi restart may
 
 function_to_cal_voltage = @(resistance, current) (current*resistance);
 
@@ -104,54 +101,33 @@ resistance_N = lsqcurvefit(function_to_cal_voltage, predict_resistance, currents
     Km = Ke;
 
 % Run simulation and collect output of current strength
-    for i = 1:1:1
+    for i = 1:1:length(voltages)
         U = voltages(i);
         if (U==0) % Bypass the value U = 0
             continue; 
         end 
-        set_param("model_lab_2", "StartTime", "0", "StopTime", simulation_model_1_current_stop_time);
         model_1 = sim("model_lab_2.slx");
-        figure("Name","Model 1: Voltage = "+num2str(U), "WindowState", "maximized");
-        plot(model_1.current.Time, model_1.current.Data, 'blue');
+        figure("Name","Model 1: Voltage = "+num2str(U));
+        %plot(model_1.current.Time, model_1.current.Data);
         xlabel("Time, [sec]");
         ylabel("I, [Ampe]");
-        grid on;
-        grid minor;
-        title_of_graph = "I(t) at voltage = " + num2str(U) + "V";
-        title(title_of_graph);
-%         path_to_file = "Graphs/Simulation/Currents/U=" + num2str(U) + type_of_export_graph;
-%         saveas(gcf, path_to_file);
+        path_to_file = "Graphs/Simulation/Currents/U=" + num2str(U) + type_of_export_graph;
+        %saveas(gcf, path_to_file);
     end
 
 % Run simulation and collect output of coordinate
-    for i = 1:1:1
+    for i = 1:1:length(voltages)
         U = voltages(i);
         if (U==0) % Bypass the value U = 0
             continue; 
         end 
-        figure("Name","Model 1: Voltage = "+num2str(U), "WindowState", "maximized");
+        model_1 = sim("model_lab_2.slx");
+        figure("Name","Model 1: Voltage = "+num2str(U));
+        plot(model_1.coordinate.Time, model_1.coordinate.Data);
         xlabel("Time, [sec]");
         ylabel("θ, [rad]");
-        grid on;
-        grid minor;
-        hold on;
-        title_of_graph = " θ(t) at voltage = " + num2str(U) + "V";
-        title(title_of_graph);
-        set_param("model_lab_2", "StartTime", "0", "StopTime", simulation_model_1_coordinate_stop_time);
-        model_1 = sim("model_lab_2.slx"); %run simulation
-        % Graph of simulation's data
-        plot(model_1.coordinate.Time, model_1.coordinate.Data, "red");
-
-        % Graph of real coordinate
-        real_life_results = readmatrix("clear_data_"+num2str(PWM(i))+".txt");
-        real_life_times = real_life_results(:,1);
-        real_life_coordinates = real_life_results(:,2)*pi/180;
-        plot(real_life_times, real_life_coordinates, "blue");
-        hold off;
-        % Set legend for experiments and 
-        % To save graph as png
-        path_to_file = "Graphs/Simulation/Coordinate/U=" + num2str(U) + type_of_export_graph;
-        %saveas(gcf, path_to_file);
+        path_to_file = "Graphs/Simulation/Coordinate/U=" + num2str(U) + type_of_export_graph
+        saveas(gcf, path_to_file);
     end
 
 
