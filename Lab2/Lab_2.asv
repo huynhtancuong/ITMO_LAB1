@@ -8,7 +8,7 @@ type_of_export_graph = '.png';
 simulation_model_1_coordinate_stop_time = "3";
 simulation_model_1_current_stop_time = "0.5";
 % read file
-results = readmatrix("current_measure.txt");
+results = readmatrix("Data/current_measure.txt");
 
 % get negative pwm, voltage, current
 PWM_N = results(1:10,1);
@@ -33,20 +33,28 @@ resistance_N = lsqcurvefit(function_to_cal_voltage, predict_resistance, currents
 
 % Draw graph of U(I) using resistance_N
 
-%     figure("Name", "Negative");
-%     hold on
-%     plot(currents_N, voltages_N, 'red')
-%     plot(currents_N, currents_N*resistance_N, 'k')
-%     text(currents_N(end), voltages_N(end), num2str(resistance_N));
-%     hold off
+    figure("Name", "Negative");
+    hold on;
+    grid on;
+    grid minor;
+    plot(currents_N, voltages_N, 'red');
+    plot(currents_N, function_to_cal_voltage(currents_N, resistance_N), 'blue');
+    legend({'Experiment', 'Approximation', 'Model'}, 'Location','northwest');
+    xlabel('Current, [A]');
+    ylabel('Voltage, [V]');
+    %text(currents_N(end), voltages_N(end), num2str(resistance_N));
+    hold off
 % Draw graph of U(I) using resistance_P
 
-%     figure("Name", "Positive");
-%     hold on
-%     plot(currents_P, voltages_P, 'red')
-%     plot(currents_P, currents_P*resistance_P, 'k')
-%     text(currents_P(end), voltages_P(end), num2str(resistance_P));
-%     hold off
+    figure("Name", "Positive");
+    hold on;
+    grid on;
+    grid minor;
+    plot(currents_P, voltages_P, 'red');
+    plot(currents_P, function_to_cal_voltage(currents_P, resistance_P), 'blue');
+    legend({'Experiment', 'Approximation', 'Model'}, 'Location','northwest');
+    xlabel('Current, [A]');
+    ylabel('Voltage, [V]');
 
 % 1.9 Calculate final resistance value
     resistance = (resistance_P+resistance_N)/2;
@@ -57,54 +65,85 @@ resistance_N = lsqcurvefit(function_to_cal_voltage, predict_resistance, currents
     moment_of_inertia_after_gear_box = moment_of_inertia*gear_ratio*gear_ratio
     J = moment_of_inertia_after_gear_box;
 % 2.5 Create 2x 2d array of Wnls which depend on PWM
-    funSpeed = @(x,time) x(1)*(1-exp(-time/x(2)));
-    funAngle = @(x,time) x(1)*(time-x(2)*(1-exp(-time/x(2))));
+    % For Negative PWM
+        funAngle = @(x,time) x(1)*(time-x(2)*(1-exp(-time/x(2))));
+        array_Wnls_cordinateN=[];
     
-    array_Wnls_speed=[];
-    array_Wnls_cordinate=[];
-    array_of_PWM = -100:10:100; %chinh lai sau khi res
-    for i = -100:10:100 % chinh lai sau khi res
-        results = readmatrix("clear_data_"+num2str(i)+".txt");
-        time = results(:,1);
-        angles = results(:,2)*pi/180;
-        speeds = results(:, 3)*pi/180;
-        
-        %create predict value
-        predict_Wnls = 50;
-        predict_Tm = 50;
-        
-        % get Wnls and Tm using speed data 
-        fit_result_speed = lsqcurvefit(funSpeed, ...
-                                     [predict_Wnls, predict_Tm], ...
-                                     time, ...
-                                     speeds);
-        array_Wnls_speed = [array_Wnls_speed fit_result_speed(1)];
-        % Get Wnls and Tm using angle data
-        fit_result_cordinate = lsqcurvefit(funAngle, ...
-                                         [predict_Wnls, predict_Tm], ...
-                                         time, ...
-                                         angles);
-        array_Wnls_cordinate = [array_Wnls_cordinate fit_result_cordinate(1)];
-    end
+        for i = (-100+offset*10):10:0
+            results = readmatrix("clear_data_"+num2str(i)+".txt");
+            time = results(:,1);
+            angles = results(:,2)*pi/180;
+            
+            %create predict value
+            predict_Wnls = 50;
+            predict_Tm = 50;
+            
+            % Get Wnls and Tm using angle data
+            fit_result_cordinate = lsqcurvefit(funAngle, ...
+                                             [predict_Wnls, predict_Tm], ...
+                                             time, ...
+                                             angles);
+            array_Wnls_cordinateN = [array_Wnls_cordinateN fit_result_cordinate(1)]
+        end
     
-    array_PWM_Wnls_speed = [array_of_PWM' array_Wnls_speed']
-    array_PWM_Wnls_cordinate = [array_of_PWM' array_Wnls_cordinate']
+    % For Positive PWM
+        funAngle = @(x,time) x(1)*(time-x(2)*(1-exp(-time/x(2))));
+        array_Wnls_cordinateP=[];
+    
+        for i = 0:10:(100-offset*10)
+            results = readmatrix("clear_data_"+num2str(i)+".txt");
+            time = results(:,1);
+            angles = results(:,2)*pi/180;
+            
+            %create predict value
+            predict_Wnls = 50;
+            predict_Tm = 50;
+            
+            % Get Wnls and Tm using angle data
+            fit_result_cordinate = lsqcurvefit(funAngle, ...
+                                             [predict_Wnls, predict_Tm], ...
+                                             time, ...
+                                             angles);
+            array_Wnls_cordinateP = [array_Wnls_cordinateP fit_result_cordinate(1)]
+        end
 
 % 2.6 Calculate Ke
-    function_to_cal_voltage = @(Ke, Wnls) Ke*Wnls;
-    predict_Ke = 1;
-    Ke = lsqcurvefit(function_to_cal_voltage, predict_Ke, array_Wnls_speed, voltages')
-%     figure("Name", "U(w)");
-%     hold on
-%     plot(array_Wnls_speed, voltages, '.r')
-%     plot(array_Wnls_speed, Ke*array_Wnls_speed, 'g');
-%     text(array_Wnls_speed(end)/2, voltages(end)/2, "Ke= "+ num2str(Ke));
-%     hold off;
+    % Calculate Ke for Negative duty_sp
+        function_to_cal_voltage = @(Ke, Wnls) Ke*Wnls;
+        predict_Ke = 1;
+        KeN = lsqcurvefit(function_to_cal_voltage, predict_Ke, array_Wnls_cordinateN, voltages_N')
+        figure("Name", "U(w) (U < 0)");
+        hold on
+        grid on
+        grid minor
+        plot(array_Wnls_cordinateN, voltages_N, 'r')
+        plot(array_Wnls_cordinateN, KeN*array_Wnls_cordinateN, 'g');
+        legend({'Experiment', 'Approximation', 'Model'}, 'Location','northwest')
+        xlabel('Wnls, [rad/sec]')
+        ylabel('Voltage, [V]')
+        %text(array_Wnls_speed(end)/2, voltages(end)/2, "Ke= "+ num2str(Ke));
+        hold off;
+    % Calculate Ke for Positive duty_sp
+        function_to_cal_voltage = @(Ke, Wnls) Ke*Wnls;
+        predict_Ke = 1;
+        KeP = lsqcurvefit(function_to_cal_voltage, predict_Ke, array_Wnls_cordinateP, voltages_P')
+        figure("Name", "U(w) (U > 0)");
+        hold on
+        grid on
+        grid minor
+        plot(array_Wnls_cordinateP, voltages_P, 'r')
+        plot(array_Wnls_cordinateP, KeP*array_Wnls_cordinateP, 'g')
+        legend({'Experiment', 'Approximation', 'Model'}, 'Location','northwest')
+        xlabel('Wnls, [rad/sec]')
+        ylabel('Voltage, [V]')
+        %text(array_Wnls_speed(end)/2, voltages(end)/2, "Ke= "+ num2str(Ke));
+        hold off;
+        Ke = (KeN+KeP) / 2;
 % 2.7 Let Km = Ke
     Km = Ke;
 
-% Run simulation and collect output of current strength
-    for i = 1:1:1
+% Run simulation of full model and collect output of current strength
+    for i = 1:1:length(voltages)
         U = voltages(i);
         if (U==0) % Bypass the value U = 0
             continue; 
@@ -119,12 +158,14 @@ resistance_N = lsqcurvefit(function_to_cal_voltage, predict_resistance, currents
         grid minor;
         title_of_graph = "I(t) at voltage = " + num2str(U) + "V";
         title(title_of_graph);
-%         path_to_file = "Graphs/Simulation/Currents/U=" + num2str(U) + type_of_export_graph;
-%         saveas(gcf, path_to_file);
+        % Set legend for model
+        legend("Model");
+        path_to_file = "Graphs/Simulation/Currents/U=" + num2str(U) + type_of_export_graph;
+        %saveas(gcf, path_to_file);
     end
 
 % Run simulation and collect output of coordinate
-    for i = 1:1:1
+    for i = 1:1:length(voltages)
         U = voltages(i);
         if (U==0) % Bypass the value U = 0
             continue; 
@@ -143,12 +184,13 @@ resistance_N = lsqcurvefit(function_to_cal_voltage, predict_resistance, currents
         plot(model_1.coordinate.Time, model_1.coordinate.Data, "red");
 
         % Graph of real coordinate
-        real_life_results = readmatrix("clear_data_"+num2str(PWM(i))+".txt");
+        real_life_results = readmatrix("Data/clear_data_"+num2str(PWM(i))+".txt");
         real_life_times = real_life_results(:,1);
         real_life_coordinates = real_life_results(:,2)*pi/180;
         plot(real_life_times, real_life_coordinates, "blue");
         hold off;
-        % Set legend for experiments and 
+        % Set legend for experiments and model
+        legend("Model", "Experiment");
         % To save graph as png
         path_to_file = "Graphs/Simulation/Coordinate/U=" + num2str(U) + type_of_export_graph;
         %saveas(gcf, path_to_file);
