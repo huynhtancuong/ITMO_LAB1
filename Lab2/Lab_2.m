@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 % Define some constants
     offset = 2;
     radius_of_rotor = 1.1/100; % radius of rotor = 1.1(cm) = 1.1/100(m)
@@ -23,6 +24,30 @@
     PWM = results(1:end, 1);
 % Define function_to_cal_voltage
     function_to_cal_voltage = @(resistance, current) (current*resistance);
+=======
+%define some constants
+offset = 2;
+radius_of_rotor = 1.1/100; % radius of rotor = 1.1(cm) = 1.1/100(m)
+weight_of_rotor = 0.017; % weight of rotor = 17g = 0.017kg
+gear_ratio = 48; %gear ratio of EV3 motor = 48
+L = 0.0047; % do tu cam cua cuon day
+type_of_export_graph = '.png';
+% read file
+results = readmatrix("current_measure.txt");
+
+% get negative pwm, voltage, current
+PWM_N = results(1:10,1);
+voltages_N = results(1+offset:10,2);
+currents_N = results(1+offset:10,3);
+% get positve pwm, voltage, current
+PWM_P = results(11:end,1);
+voltages_P = results(11:end-offset,2);
+currents_P = results(11:end-offset,3);
+% Get voltages 
+voltages = results(1:end,2);%chinh lai sau khi restart may
+
+function_to_cal_voltage = @(resistance, current) (current*resistance);
+>>>>>>> master
 
 % create predict value
     predict_resistance = 50;
@@ -142,6 +167,7 @@
 % 2.7 Let Km = Ke
     Km = Ke;
 
+<<<<<<< HEAD
 % Run simulation of full model 
     % Collect output of current strength
         for i = 1:1:length(voltages)
@@ -239,3 +265,52 @@
             ylabel('Speed, [rad/sec]')
             hold off
         end
+=======
+% Run simulation and collect output of current strength
+    for i = 1:1:length(voltages)
+        U = voltages(i);
+        if (U==0) % Bypass the value U = 0
+            continue; 
+        end 
+        %model_1 = sim("model_lab_2.slx");
+        %figure("Name","Model 1: Voltage = "+num2str(U));
+        %plot(model_1.current.Time, model_1.current.Data);
+        %xlabel("Time, [sec]");
+        %ylabel("I, [Ampe]");
+        path_to_file = "Graphs/Simulation/Currents/U=" + num2str(U) + type_of_export_graph;
+        %saveas(gcf, path_to_file);
+    end
+
+% Run simulation and collect output of coordinate
+    for i = 1:1:length(voltages)
+        U = voltages(i);
+        if (U==0) % Bypass the value U = 0
+            continue; 
+        end 
+        %model_1 = sim("model_lab_2.slx");
+        %figure("Name","Model 1: Voltage = "+num2str(U));
+        %plot(model_1.coordinate.Time, model_1.coordinate.Data);
+        %xlabel("Time, [sec]");
+        %ylabel("θ, [rad]");
+        path_to_file = "Graphs/Simulation/Coordinate/U=" + num2str(U) + type_of_export_graph;
+        %saveas(gcf, path_to_file);
+    end
+
+
+
+
+
+% Cal resistance by using formula
+% R = 0;
+% sumUI = 0;
+% sumII = 0;
+% for i = 1:length(voltages_N)
+%     sumUI = sumUI + voltages_N(i)*currents_N(i);
+%     sumII = sumII + currents_N(i)*currents_N(i);
+% end
+% for i = 1:length(voltages_P)
+%     sumUI = sumUI + voltages_P(i)*currents_P(i);
+%     sumII = sumII + currents_P(i)*currents_P(i);
+% end
+% resistance_cal_by_formula = sumUI / sumII
+>>>>>>> master
