@@ -1,35 +1,35 @@
-%define some constants
-offset = 2;
-radius_of_rotor = 1.1/100; % radius of rotor = 1.1(cm) = 1.1/100(m)
-weight_of_rotor = 0.017; % weight of rotor = 17g = 0.017kg
-gear_ratio = 48; %gear ratio of EV3 motor = 48
-L = 0.0047; % do tu cam cua cuon day
-type_of_export_graph = '.png';
-simulation_model_1_coordinate_stop_time = "3";
-simulation_model_1_current_stop_time = "0.5";
-% read file
-results = readmatrix("Data/current_measure.txt");
+% Define some constants
+    offset = 2;
+    radius_of_rotor = 1.1/100; % radius of rotor = 1.1(cm) = 1.1/100(m)
+    weight_of_rotor = 0.017; % weight of rotor = 17g = 0.017kg
+    gear_ratio = 48; %gear ratio of EV3 motor = 48
+    L = 0.0047; % do tu cam cua cuon day
+    type_of_export_graph = '.png';
+    simulation_model_1_coordinate_stop_time = "3";
+    simulation_model_1_current_stop_time = "0.5";
+% Read file
+    results = readmatrix("Data/current_measure.txt");
 
-% get negative pwm, voltage, current
-PWM_N = results(1:10,1);
-voltages_N = results(1+offset:11,2);
-currents_N = results(1+offset:11,3);
+% Get negative pwm, voltage, current
+    PWM_N = results(1:10,1);
+    voltages_N = results(1+offset:11,2);
+    currents_N = results(1+offset:11,3);
 % get positve pwm, voltage, current
-PWM_P = results(11:end,1);
-voltages_P = results(11:end-offset,2);
-currents_P = results(11:end-offset,3);
-% Get voltages 
-voltages = results(1:end,2);
-PWM = results(1:end, 1);
-
-function_to_cal_voltage = @(resistance, current) (current*resistance);
+    PWM_P = results(11:end,1);
+    voltages_P = results(11:end-offset,2);
+    currents_P = results(11:end-offset,3);
+% Get voltages and PWM
+    voltages = results(1:end,2);
+    PWM = results(1:end, 1);
+% Define function_to_cal_voltage
+    function_to_cal_voltage = @(resistance, current) (current*resistance);
 
 % create predict value
-predict_resistance = 50;
+    predict_resistance = 50;
 
 % Calculate resistance by using approximation
-resistance_P = lsqcurvefit(function_to_cal_voltage, predict_resistance, currents_P, voltages_P);
-resistance_N = lsqcurvefit(function_to_cal_voltage, predict_resistance, currents_N, voltages_N);
+    resistance_P = lsqcurvefit(function_to_cal_voltage, predict_resistance, currents_P, voltages_P);
+    resistance_N = lsqcurvefit(function_to_cal_voltage, predict_resistance, currents_N, voltages_N);
 
 % Draw graph of U(I) using resistance_N
 
@@ -182,7 +182,7 @@ resistance_N = lsqcurvefit(function_to_cal_voltage, predict_resistance, currents
             title(title_of_graph);
             set_param("model_lab_2", "StartTime", "0", "StopTime", simulation_model_1_coordinate_stop_time);
             model_1 = sim("model_lab_2.slx"); %run simulation
-            % Graph of simulation's data
+            % Graph of simulation data
             plot(model_1.coordinate.Time, model_1.coordinate.Data, "red");
     
             % Graph of real coordinate
