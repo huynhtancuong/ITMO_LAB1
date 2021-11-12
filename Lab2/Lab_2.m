@@ -200,7 +200,7 @@ resistance_N = lsqcurvefit(function_to_cal_voltage, predict_resistance, currents
     
 % Run Simulation of full model and simplied model
     %For angle
-        for i = 1:21
+        for i = 19:21
             results = readmatrix("Data/clear_data_"+num2str(PWM(i))+".txt");
             time = results(1:157,1);
             angles = results(1:157,2)*pi/180;
@@ -221,21 +221,21 @@ resistance_N = lsqcurvefit(function_to_cal_voltage, predict_resistance, currents
         end
 
     %For speed
-        for i = 1:21
-            results = readmatrix("Data/clear_data_"+num2str(PWM(i))+".txt");
-            time = results(1:159,1);
-            angles = results(1:159,2)*pi/180;
-            figure("Name", "W(t) (U = " + num2str(voltages(i)) + ")");
-            hold on
-            grid on
-            grid minor
-            U = voltages(i);
-            simout1 = sim('Lab2model'); %Full model
-            simout2 = sim('SpeedModel'); %Simplified Model
-            plot(simout1.W.Time, simout1.W.Data, 'b')
-            plot(simout2.W.Time, simout2.W.Data, 'r-.')
-            legend('FullModel', 'Simplified Model', 'Location','northeast')
-            xlabel('Time, [sec]')
-            ylabel('Speed, [rad/sec]')
-            hold off
-        end
+%         for i = 1:21
+%             results = readmatrix("Data/clear_data_"+num2str(PWM(i))+".txt");
+%             time = results(1:159,1);
+%             angles = results(1:159,2)*pi/180;
+%             figure("Name", "W(t) (U = " + num2str(voltages(i)) + ")");
+%             hold on
+%             grid on
+%             grid minor
+%             U = voltages(i);
+%             simout1 = sim('Lab2model'); %Full model
+%             simout2 = sim('SpeedModel'); %Simplified Model
+%             plot(simout1.W.Time, simout1.W.Data, 'b')
+%             plot(simout2.W.Time, simout2.W.Data, 'r-.')
+%             legend('FullModel', 'Simplified Model', 'Location','northeast')
+%             xlabel('Time, [sec]')
+%             ylabel('Speed, [rad/sec]')
+%             hold off
+%         end
