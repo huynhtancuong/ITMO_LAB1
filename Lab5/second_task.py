@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import string
 from ev3dev.ev3 import *
 import time
 import math
@@ -17,8 +18,8 @@ prevLeftAngel, prevRightAngel = 0, 0
 leftMotor.position = rightMotor.position = 0  # reset memory
 
 # Coefficients for P controller 
-K_STRAIGHT = 500
-K_ROTATION = 200
+K_STRAIGHT = 1000
+K_ROTATION = 1000
 
 # List of target or single target
 
@@ -40,7 +41,7 @@ def writeData(xCoord, yCoord, currentTime):
     sh.write(str(xCoord) + " " + str(yCoord) + " " + str(currentTime) + "\n")
 
 
-sh = open("Data/data_9_ks=600_kr=400.txt", "w") # Open the file
+sh = open("Data/second_task_data_ks="+str(K_STRAIGHT)+"_kr="+str(K_ROTATION)+".txt", "w") # Open the file
 writeData(xCoord, yCoord, currentTime) # Write to file for the first time.
 
 for target in targets: # This is a loop, which go through every target in array targets.
@@ -90,12 +91,12 @@ for target in targets: # This is a loop, which go through every target in array 
 
 
         # calculation of linear speed
-        baseSpeed = K_STRAIGHT * distance
+        baseSpeed = K_STRAIGHT * distance * math.cos(heading)
         if abs(baseSpeed) > 50:
             baseSpeed = math.copysign(1, baseSpeed) * 50
 
         # calculation of angular velocity
-        control = K_ROTATION * heading
+        control = K_STRAIGHT*math.cos(heading)*math.sin(heading) +  K_ROTATION * heading 
         if abs(control) > 30:
             control = math.copysign(1, control) * 30
 

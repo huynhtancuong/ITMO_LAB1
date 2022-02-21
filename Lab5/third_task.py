@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import string
 from ev3dev.ev3 import *
 import time
 import math
@@ -7,7 +8,12 @@ RADIUS_OF_WHEEL = 0.025
 DISTANCE_BETWEEN_WHEELS = 0.15
 PI = math.pi
 DEG2RAD = PI / 180
-ERROR = 0.05
+ERROR = 0.5
+
+a = 0
+b = 1
+c = 1
+planed_time = 0
 
 
 leftMotor = LargeMotor('outA')
@@ -17,8 +23,8 @@ prevLeftAngel, prevRightAngel = 0, 0
 leftMotor.position = rightMotor.position = 0  # reset memory
 
 # Coefficients for P controller 
-K_STRAIGHT = 500
-K_ROTATION = 200
+K_STRAIGHT = 300
+K_ROTATION = 300
 
 # List of target or single target
 
@@ -40,14 +46,20 @@ def writeData(xCoord, yCoord, currentTime):
     sh.write(str(xCoord) + " " + str(yCoord) + " " + str(currentTime) + "\n")
 
 
-sh = open("Data/data_9_ks=600_kr=400.txt", "w") # Open the file
+#Function to calculate target
+def idea_trajectory(a, b, c, t):
+    x = a + b*math.sin(2*c*t)
+    y = b*math.sin(c*t)
+    return x, y
+
+sh = open("Data/third_task_data_ks="+str(K_STRAIGHT)+"_kr="+str(K_ROTATION)+"_a="+str(a)+"_b="+str(b)+"_c="+str(c)+".txt", "w") # Open the file
 writeData(xCoord, yCoord, currentTime) # Write to file for the first time.
 
-for target in targets: # This is a loop, which go through every target in array targets.
+while (1): # This is a loop, which go through every target in array targets.
     
     # Assign xGoal and yGoal
-    xGoal = target[0] 
-    yGoal = target[1]
+    xGoal, yGoal = idea_trajectory(a, b, c, planed_time)
+    planed_time+=0.2
 
     while (1):
 
@@ -90,12 +102,12 @@ for target in targets: # This is a loop, which go through every target in array 
 
 
         # calculation of linear speed
-        baseSpeed = K_STRAIGHT * distance
+        baseSpeed = K_STRAIGHT * distance * math.cos(heading)
         if abs(baseSpeed) > 50:
             baseSpeed = math.copysign(1, baseSpeed) * 50
 
         # calculation of angular velocity
-        control = K_ROTATION * heading
+        control = K_STRAIGHT*math.cos(heading)*math.sin(heading) +  K_ROTATION * heading 
         if abs(control) > 30:
             control = math.copysign(1, control) * 30
 
@@ -116,8 +128,8 @@ for target in targets: # This is a loop, which go through every target in array 
 
         # exit when reaching goal area
         if (distance < ERROR):
-            leftMotor.stop(stop_action='brake')
-            rightMotor.stop(stop_action='brake')
+            #leftMotor.stop(stop_action='brake')
+            #rightMotor.stop(stop_action='brake')
             #sh.close()
             sh.write("\n\n\n")
             break
