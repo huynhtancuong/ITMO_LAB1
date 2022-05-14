@@ -7,7 +7,6 @@ L = 0.0047;
 R_electronic = 4.73;
 k_e = 0.274;
 k_m = k_e;
-M_oth = 0;
 
 % Controler
 R = 0.025;

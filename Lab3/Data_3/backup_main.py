@@ -16,17 +16,18 @@ fh.write('0' + ' ' + '0' + '\n')
 target_d = 30
 
 
-kp = 3
-ki = 0
-kd = 0
+kp = 4
+ki = 0.01
+kd = 0.3
  
 
 
 start_time = time.time()
-previous_time = start_time
+
 integral = 0
 previous_error = 0
 current_time = time.time() - start_time
+previous_time = current_time
 
 
 def getUS1():
@@ -45,11 +46,13 @@ while (True):
 
 	proportional = error
 	integral = integral + (error*dt)
+	#if (integral < -30):
+	#	integral = -30
 	derivative = (error - previous_error)/dt
 	
 	Ur = kp*proportional + ki*integral + kd*derivative
-	U_left = Ur 
-	U_right = Ur
+	U_left = -Ur 
+	U_right = -Ur
 	
 	if (U_left > 100):
 		U_left = 100
@@ -60,7 +63,7 @@ while (True):
 	if (U_right < -100):
 		U_right = -100
 
-	#fh.write(str(current_time) + ' ' + str(U_left) + ' ' + str(U_right) + ' ' + str(d_now) + '\n')	
+	fh.write(str(current_time) + ' ' + str(d_now) + ' ' + str(error) + ' ' + str(Ur) + ' ' +  str(proportional) + ' ' + str(integral) + ' ' + str(derivative) +'\n')	
 
 	leftM.run_direct(duty_cycle_sp=U_left)
 	rightM.run_direct(duty_cycle_sp=U_right)
@@ -69,4 +72,3 @@ while (True):
 	#fh.write(str(current_time) + ' ' + str(mA.position) + '\n')
 	previous_time = current_time
 	previous_error = error
-

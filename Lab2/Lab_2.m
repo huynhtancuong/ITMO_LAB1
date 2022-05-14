@@ -14,7 +14,7 @@ results = readmatrix("Data/current_measure.txt");
 PWM_N = results(1:10,1);
 voltages_N = results(1+offset:11,2);
 currents_N = results(1+offset:11,3);
-% get positve pwm, voltage, current
+% get positve pwm, voltage, currentwhat
 PWM_P = results(11:end,1);
 voltages_P = results(11:end-offset,2);
 currents_P = results(11:end-offset,3);

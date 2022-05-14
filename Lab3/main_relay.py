@@ -11,10 +11,6 @@ fh.write('0' + '0' + '\n')
 
 start_time = time.time()
 
-
-
-
-
 target_theta = 580
 
 while True:
@@ -30,3 +26,4 @@ while True:
 	if (current_time - start_time >= 10):
 		mA.stop(stop_action = 'brake')
 		fh.close
+		break
