@@ -6,17 +6,13 @@ function [theta1, theta2, theta3] = InvertedKinematic(x, y, z)
         a2 = 0.1625;
         a3 = 0.15;
         % Calculate theta1
-        %y = round(y,3);
-        %x = round(x,3);
         theta1  = atan2(y, x)-pi;
-        %theta1  = atan(y/x);
         
         % Calculate theta2
         %r1      = sqrt(x^2+y^2);
         r1 = sqrt((x - a1*cos(theta1))^2 + (y - a1*sin(theta1))^2 );
         r2      = z-d1;
         phi2    = atan2(r2, r1);
-%         phi2    = atan(r2/r1);
         r3      = sqrt(r1^2 + r2^2);
         phi1    = acos((a2^2 + r3^2 - a3^2) / (2*a2*r3));
         theta2  = pi/2-(phi1+phi2);
